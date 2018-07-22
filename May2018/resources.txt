@@ -1,0 +1,52 @@
+Here are the resources shared by Anna:
+
+Julia Silge's book and blog (I also recommend the book for anyone who wants to start her adventure with text mining in general):
+
+https://www.tidytextmining.com/
+https://juliasilge.com/blog/
+
+
+article on three lexicons:
+
+https://datacritics.com/2018/03/14/three-text-sentiment-lexicons-in-r-tidytext/?utm_campaign=News&utm_medium=Community&utm_source=DataCamp.com
+
+
+DataCamp tutorials and courses:
+
+https://www.datacamp.com/community/tutorials/sentiment-analysis-R#introduction
+
+https://www.datacamp.com/courses/sentiment-analysis-in-r-the-tidy-way
+
+https://www.datacamp.com/courses/sentiment-analysis-in-r
+
+
+kaggle tutorial (with GREAT resources at the bottom):
+
+https://www.kaggle.com/rtatman/tutorial-sentiment-analysis-in-r/code
+
+
+some random tutorial:
+
+https://datacritics.com/2018/02/27/mining-for-love-in-brontes-wuthering-heights/?utm_campaign=News&utm_medium=Community&utm_source=DataCamp.com
+
+
+shiny apps for sentiment analysis:
+
+https://www.showmeshiny.com/tweet-sentiment-analysis/
+
+https://www.showmeshiny.com/text-analysis/
+
+https://www.showmeshiny.com/sentiment-and-emotion-analysis/
+
+
+other resources for text mining:
+
+https://www.datacamp.com/community/podcast/text-mining-nlproc
+
+https://www.datacamp.com/community/tutorials/R-nlp-machine-learning
+
+https://www.datacamp.com/community/news/uncovering-hidden-trends-in-airbnb-reviews-98nohaqt1gc
+
+https://www.datacamp.com/courses/intro-to-text-mining-bag-of-words
+
+https://medium.com/dair-ai/detecting-sarcasm-with-deep-convolutional-neural-networks-4a0657f79e80
