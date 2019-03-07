@@ -1,0 +1,612 @@
+---
+title: "Data visualisation with ggplot"
+author: "Ilaria Torre"
+date: "21 February 2019"
+output:
+  ioslides_presentation:
+    fig_height: 2
+    fig_width: 4
+    smaller: yes
+    widescreen: yes
+  beamer_presentation: default
+fontsize: 10pt
+---
+
+```{r setup, include=FALSE}
+library(formatR)
+knitr::opts_chunk$set(echo = TRUE, width = 40, breaklines = T, tidy.opts = list(width.cutoff = 40), message=FALSE, warning = FALSE, tidy = TRUE, fig.align = "center")
+
+```
+
+## Sources
+
+- ggplot documentation: <http://docs.ggplot2.org/current/>
+- easier tutorials: <http://www.noamross.net/blog/2012/10/5/ggplot-introduction.html>, 
+- R Markdown (the tool I used to make these slides), also an R package
+- grammar of graphics: <https://www.springer.com/gp/book/9780387245447>
+
+
+## Installation
+
+```{r}
+# install.packages("ggplot2")
+library(ggplot2)
+# View(iris)
+# ggthemr_reset()
+```
+
+- Pros: part of tidyverse, consistent grammar, makes sense, powerful, active community
+- Cons: more difficult to start with, computationally intensive 
+
+## Layers
+
+Plots are built as a series of layers, e.g.:
+
+- One layer for the box that will contain the plot
+- One layer for points
+- One layer for lines
+- One layer for axes
+- One layer for annotations
+...
+
+Great introduction: <http://tutorials.iq.harvard.edu/R/Rgraphics/Rgraphics.html>
+
+## Iris data set
+
+- 150 rows
+- 4 measurements
+- 1 factor (species) with 3 levels
+
+```{r}
+View(iris)
+```
+
+
+## Scatterplot
+
+```{r}
+ggplot()
+```
+
+Nothing is happening: ggplot is just the first layer
+
+## Scatterplot
+
+```{r}
+ggplot() + 
+  geom_point(data = iris, aes(x = Sepal.Length, y = Sepal.Width))
+```
+
+## Scatterplot
+
+Plots can be assigned to variables too:
+
+```{r}
+g <- ggplot()
+```
+
+----
+
+And you can add new layers at any point:
+
+```{r}
+g + 
+  geom_point(data = iris, aes(x = Sepal.Length, y = Sepal.Width))
+```
+
+## Scatterplot
+
+Adding trendline
+
+```{r}
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) + 
+  geom_point() + 
+  geom_smooth()
+```
+
+## Scatterplot
+
+Regression line
+
+```{r}
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) + 
+  geom_point() + 
+  geom_smooth(method = lm)
+```
+
+## Scatterplot
+
+Get rid of the error
+
+```{r}
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) + 
+  geom_point() + 
+  geom_smooth(method = lm, se = F)
+```
+
+## Plot using stat function
+
+```{r}
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width)) + 
+  stat_summary(geom = "point", fun.y = mean)
+```
+
+Be careful where you put data and aes: only if all layers have the same data, x and y, then you can put these inside ggplot()
+
+## Plot using stat function
+
+fun.y = mean is calling mean(.) on the y-axis.
+
+You can replace mean() with e.g. median() or even your own function
+
+## Scatterplot
+
+Adding the grouping factor with colour
+
+```{r}
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width, color = Species)) + 
+  stat_summary(geom = "point", fun.y = mean)
+```
+
+## Scatterplot
+
+Adding the grouping factor with shape
+
+```{r}
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width, shape = Species)) + 
+  stat_summary(geom = "point", fun.y = mean)
+```
+
+## Scatterplot
+
+Colour AND shape, why not!
+
+```{r}
+ggplot(data = iris, aes(x = Sepal.Length, y = Sepal.Width, shape = Species, color =  Species)) +
+  stat_summary(geom = "point", fun.y = mean)
+```
+
+## Barplot
+
+``` {r}
+ggplot(data = iris, aes(x = Species, y = Petal.Width)) + 
+    stat_summary(geom = "bar", fun.y = mean)
+
+ # geom_bar(stat = "identity")
+  
+```
+
+## Barplot
+
+```{r}
+ggplot(data = iris, aes(x = Species, y = Petal.Width, fill = Species)) + 
+  stat_summary(geom = "bar", fun.y = mean)
+```
+
+Notice: "fill" instead of "color"
+
+
+## Error bars
+
+```{r}
+iris_error <- data.frame(Species = c("setosa", "versicolor", "virginica"), Petal.Width = c(0.246, 1.326, 2.026))
+View(iris_error)
+
+g <- ggplot(data = iris_error, aes(x = Species, y = Petal.Width, fill = Species)) + 
+  geom_bar(stat = "identity")
+g
+```
+
+## Error bars
+
+- With a similar data frame + standard error, we can add error bars
+- Function "summarySE" can do it for us 
+- Source: http://www.cookbook-r.com/Manipulating_data/Summarizing_data/ 
+
+```{r}
+source('summarySE.R') 
+
+iris_error <- summarySE(iris, measurevar = "Petal.Width", groupvars = "Species")
+
+```
+
+## Error bars
+
+```{r}
+g <- ggplot(data = iris_error, aes(x = Species, y = Petal.Width, fill = Species)) + 
+  geom_bar(stat = "identity") +
+  geom_errorbar(aes(ymin = Petal.Width - se, ymax = Petal.Width + se), width = .4)
+g
+```
+
+## Error bars
+
+Instead of using the summarySE function, you can create a summary data frame with tidyverse. It has the advantage of using the same grammar as ggplot, and is faster.
+
+```{r}
+# install.packages("tidyverse") 
+library(tidyverse)
+
+iris2 <- iris %>% 
+	group_by(Species) %>% 
+	summarise(
+	  N = n(),
+		mean = mean(Petal.Width), 
+		sd = sd(Petal.Width),
+		se = sd / sqrt(50),
+		ci = qt(.975, N - 1) * se ) 
+```
+
+
+## Boxplot
+
+```{r}
+ggplot(data = iris, aes(x = Species, y = Petal.Width, fill = Species)) + 
+  stat_boxplot() 
+```
+
+## Line plot
+
+```{r}
+ggplot(data = iris, aes(x = Sepal.Width, y = Sepal.Length, color = Species)) + 
+  stat_summary(fun.y = mean, geom = "line")
+
+```
+
+What happens if you write `+ geom_line()' instead of 'stat_summary()?
+
+## Line plot
+
+Lines and points
+
+```{r}
+ggplot(data = iris, aes(x = Sepal.Width, y = Sepal.Length, color = Species)) + 
+  stat_summary(fun.y = mean, geom = "line") + 
+  stat_summary(fun.y = mean, geom = "point", aes(shape = Species))
+```
+
+## Messing around with parameters
+
+Base plot:
+
+```{r}
+g <- ggplot(data = iris, aes(x = Sepal.Width, y = Sepal.Length, color = Species)) + 
+  stat_summary(fun.y = mean, geom = "line") + 
+  stat_summary(fun.y = mean, geom = "point", aes(shape = Species))
+g
+```
+
+
+## Messing around with parameters
+
+- Changing the dimensions of the axes
+
+```{r}
+g + 
+  xlim(0, 10) + 
+  ylim(0,10)
+```
+
+## Messing around with parameters
+
+- Changing the size of the elements in the graph
+
+```{r}
+ggplot(data = iris, aes(x = Sepal.Width, y = Sepal.Length,color = Species)) + 
+  stat_summary(fun.y = mean, geom = "line", size = 2) + 
+  stat_summary(fun.y = mean, geom = "point", aes(shape = Species), size = 3)
+```
+
+## Messing around with parameters
+
+- Changing the size of the text around the graph (theme layer)
+
+```{r}
+g + theme(axis.text = element_text(size = 14), 
+legend.text = element_text(size = 14), 
+legend.title = element_text(size = 14), 
+axis.title = element_text(size = 14))
+
+```
+
+## Messing around with parameters
+
+- Changing the axes names
+
+```{r}
+g + 
+  labs(x = "Sepal Width", y = "Sepal Length")
+```
+
+## Messing around with parameters
+
+- Adding a title
+
+```{r}
+g + 
+  labs(x = "Sepal Width", y = "Sepal Length", title = "Iris plot")
+```
+
+## Messing around with parameters
+
+- Adding a title in a different way
+
+```{r}
+g + 
+  ggtitle("Iris plot 2") 
+```
+
+
+## Messing around with parameters
+
+- Custom colours
+
+```{r}
+coll <- c("violetred", "darkblue", "lightgreen")
+```
+
+Allowed names: <http://www.stat.columbia.edu/~tzheng/files/Rcolor.pdf>
+
+## Messing around with parameters
+
+- Custom colours
+
+```{r}
+g + 
+  scale_color_manual(values = coll)
+```
+
+## Messing around with parameters
+
+- Semi Custom colours
+
+```{r}
+g + 
+  scale_color_brewer(palette = "Spectral")
+```
+
+Some palette choices here: <http://www.r-bloggers.com/choosing-colour-palettes-part-ii-educated-choices/>
+
+## Messing around with parameters
+
+- Grey scales
+
+```{r}
+g + 
+  scale_color_grey()
+```
+
+## Messing around with parameters
+
+- Change legend title and names
+
+```{r}
+g <- ggplot(data = iris, aes(x = Sepal.Width, y = Sepal.Length, color = Species)) + 
+  stat_summary(fun.y = mean, geom = "line") + 
+  stat_summary(fun.y = mean, geom = "point", aes(shape = Species)) + 
+  labs(x = "Sepal Width", y = "Sepal Length") + 
+  ggtitle("Iris plot 2")
+
+g
+```
+
+## Messing around with parameters
+
+- Change legend title and names
+
+```{r}
+g + 
+  scale_color_grey(name = "New Legend Title", labels = c("se", "ver", "vir"))
+```
+
+But this creates 2 different legends!
+
+## Messing around with parameters
+
+- The reason is that we only specified the "coloured" layer to have a new legend
+- We need to specify the "shaped" layer as well!
+
+```{r}
+g + 
+  scale_color_grey(name = "New Legend Title", labels = c("se", "ver", "vir")) +
+  scale_shape_discrete(name = "New Legend Title", labels = c("se", "ver", "vir"))
+```
+
+## Messing around with parameters
+
+Or define the labels in a variable
+
+```{r}
+new_labels <- c("se", "ver", "vir")
+
+g + 
+  scale_color_grey(name = "New Legend Title", labels = new_labels) +
+  scale_shape_discrete(name = "New Legend Title", labels = c("se", "ver", "vir"))
+```
+
+---
+
+```{r}
+g <- g + 
+  scale_color_grey()
+
+g
+```
+
+## Messing around with parameters
+
+- Print-friendly
+
+```{r}
+g + 
+  theme_bw()
+
+```
+
+## Messing around with parameters
+
+- Delete legend or part of
+
+```{r}
+g + 
+  guides(color = "none", shape = "none") +
+  theme_bw()
+```
+
+## Messing around with parameters
+
+- Delete legend or part of:
+  Just leave the "" empty
+
+
+
+## Additional themes
+
+- Package 'ggthemr': <https://github.com/cttobin/ggthemr>
+
+```{r}
+# This is not on CRAN yet. You need to install via
+# devtools::install_github('cttobin/ggthemr')
+library(ggthemr)
+ggthemr('fresh')
+g
+ggthemr_reset()
+
+```
+
+## Additional themes
+
+- Collection of themes, including a replica of Stata graph schemes: <https://github.com/jrnold/ggthemes>
+- APA-themed ggplot template: <https://sakaluk.wordpress.com/2015/04/13/2-the-ggplot2-package-your-gateway-drug-to-becoming-an-r-user/>
+
+## Additional themes
+
+Example of the aforementioned APA theme:
+
+```{r}
+# windowsFonts(Times=windowsFont("TT Times New Roman")) 
+
+apatheme = theme_bw() +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(),
+        text = element_text(family="Times"),
+        legend.title = element_blank())
+
+g + 
+  apatheme
+```
+
+Note: the font family argument caused the following error in my machine: "Font family not found in Windows font database".
+I solved it by running the windowsFonts() function just above. You might not encounter this error though!
+
+## Additional themes
+
+Game of thrones palette!! <https://github.com/aljrico/gameofthrones>
+
+```{r}
+# install.packages("gameofthrones")
+library(gameofthrones)
+
+t <- ggplot(diamonds, aes(factor(color), fill=factor(cut))) +  
+  geom_bar(colour = "black") +
+  theme_minimal()
+
+t
+
+```
+
+## Additional themes
+
+```{r}
+
+t + 
+  scale_fill_got(discrete = TRUE, option = "Daenerys")
+```
+
+
+## Additional themes
+
+Harry Potter palette!!! <https://github.com/aljrico/harrypotter>
+
+```{r}
+# install.packages("harrypotter")
+library(harrypotter)
+
+t + 
+  scale_fill_hp(discrete = TRUE, house = "slytherin")
+```
+ 
+
+
+## Faceting
+
+```{r}
+g + 
+  facet_wrap(~Species)
+```
+
+## Faceting
+
+- 2 grouping variables
+- Iris only has one so I will add another one
+
+```{r}
+iris2 <- iris
+iris2$fac <- c("a", "b", "c")
+
+View(iris2)
+```
+
+
+
+## Faceting
+
+```{r}
+g <- ggplot(data = iris2, aes(x = Sepal.Width, y = Sepal.Length, color = Species)) + 
+  stat_summary(fun.y = mean, geom = "line") + 
+  stat_summary(fun.y = mean, geom = "point", aes(shape = Species)) + 
+  theme(axis.text = element_text(size = 14), legend.text = element_text(size = 14), legend.title = element_text(size = 14), axis.title = element_text(size = 14)) + 
+  labs(x = "Sepal Width", y = "Sepal Length") + 
+  ggtitle("Iris plot 2") + 
+  scale_color_grey() + 
+  theme_bw()
+```
+
+```{r}
+g + 
+  facet_grid(Species~fac)
+
+```
+
+
+## Saving plot 
+
+
+```{r}
+
+ggsave(g, file = "g.pdf")
+ggsave(g, file = "g.png")
+
+```
+
+You can also run the regular pdf() or png() functions. ggsave will understand the format you want to save in from the file name extension.
+
+## Saving plot 
+
+
+```{r}
+
+ggsave(g, file = "g.png", width = 10, height = 4, units = "cm")
+
+```
+
+## Questions?
+
+Thank you!
+
+Dr. Ilaria Torre
+torrei@tcd.ie
+
+<https://edge-research.eu/fellows/ilaria-torre/>
